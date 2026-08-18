@@ -183,73 +183,110 @@ function Admin() {
       ) : guests.length === 0 ? (
         <div className={styles.empty}>No guests found.</div>
       ) : (
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Contact</th>
-                <th>RSVP</th>
-                <th>+</th>
-                <th>Dietary</th>
-                <th>Status</th>
-                <th>Date</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {guests.map((guest) => (
-                <tr key={guest.id}>
-                  {editingId === guest.id ? (
-                    <>
-                      <td>
-                        <input value={editName} onChange={(e) => setEditName(e.target.value)} className={styles.editInput} />
-                      </td>
-                      <td>
-                        <input value={editContact} onChange={(e) => setEditContact(e.target.value)} className={styles.editInput} />
-                      </td>
-                      <td>
-                        <select value={editRsvp} onChange={(e) => setEditRsvp(e.target.value)} className={styles.editSelect}>
-                          <option value="Attending">Attending</option>
-                          <option value="Not Attending">Not Attending</option>
-                          <option value="Undecided">Undecided</option>
-                        </select>
-                      </td>
-                      <td>{guest.companions > 0 ? `+${guest.companions}` : '—'}</td>
-                      <td className={styles.dietaryCell}>{guest.dietaryRestrictions || '—'}</td>
-                      <td><span className={styles.badge}>{guest.approvalStatus}</span></td>
-                      <td className={styles.dateCell}>{new Date(guest.submittedAt).toLocaleDateString()}</td>
-                      <td className={styles.actions}>
-                        <button onClick={() => saveEdit(guest.id)} className={styles.saveBtn}>Save</button>
-                        <button onClick={() => setEditingId(null)} className={styles.cancelBtn}>Cancel</button>
-                      </td>
-                    </>
-                  ) : (
-                    <>
-                      <td>{guest.name}</td>
-                      <td className={styles.contactCell}>{guest.contactNumber || '—'}</td>
-                      <td><span className={styles.badge}>{guest.rsvpStatus}</span></td>
-                      <td>{guest.companions > 0 ? `+${guest.companions}` : '—'}</td>
-                      <td className={styles.dietaryCell}>{guest.dietaryRestrictions || '—'}</td>
-                      <td><span className={styles.badge}>{guest.approvalStatus}</span></td>
-                      <td className={styles.dateCell}>{new Date(guest.submittedAt).toLocaleDateString()}</td>
-                      <td className={styles.actions}>
-                        {guest.approvalStatus === 'Pending' && (
-                          <button onClick={() => handleApprove(guest.id)} className={styles.approveBtn}>Approve</button>
-                        )}
-                        <button onClick={() => startEdit(guest)} className={styles.editBtn}>Edit</button>
-                        <button onClick={() => handleDelete(guest.id, guest.name)} className={styles.deleteBtn}>Delete</button>
-                      </td>
-                    </>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className={styles.cardList}>
+          {guests.map((guest) => (
+            <div key={guest.id} className={styles.card}>
+              {editingId === guest.id ? (
+                <>
+                  <div className={styles.cardRow}>
+                    <span className={styles.cardLabel}>NAME</span>
+                    <input value={editName} onChange={(e) => setEditName(e.target.value)} className={styles.editInput} />
+                  </div>
+                  <div className={styles.cardRow}>
+                    <span className={styles.cardLabel}>CONTACT</span>
+                    <input value={editContact} onChange={(e) => setEditContact(e.target.value)} className={styles.editInput} />
+                  </div>
+                  <div className={styles.cardRow}>
+                    <span className={styles.cardLabel}>RSVP</span>
+                    <select value={editRsvp} onChange={(e) => setEditRsvp(e.target.value)} className={styles.editSelect}>
+                      <option value="Attending">Attending</option>
+                      <option value="Not Attending">Not Attending</option>
+                      <option value="Undecided">Undecided</option>
+                    </select>
+                  </div>
+                  <div className={styles.cardRow}>
+                    <span className={styles.cardLabel}>COMPANIONS</span>
+                    <span className={styles.cardValue}>{guest.companions > 0 ? `+${guest.companions}` : '—'}</span>
+                  </div>
+                  <div className={styles.cardRow}>
+                    <span className={styles.cardLabel}>DIETARY</span>
+                    <span className={styles.cardValue}>{guest.dietaryRestrictions || '—'}</span>
+                  </div>
+                  <div className={styles.cardActions}>
+                    <button onClick={() => saveEdit(guest.id)} className={styles.saveBtn}>Save</button>
+                    <button onClick={() => setEditingId(null)} className={styles.cancelBtn}>Cancel</button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className={styles.cardRow}>
+                    <span className={styles.cardLabel}>NAME</span>
+                    <span className={styles.cardValue}>{guest.name}</span>
+                  </div>
+                  <div className={styles.cardRow}>
+                    <span className={styles.cardLabel}>CONTACT</span>
+                    <span className={styles.cardValue}>{guest.contactNumber || '—'}</span>
+                  </div>
+                  <div className={styles.cardRow}>
+                    <span className={styles.cardLabel}>RSVP</span>
+                    <span className={styles.cardValue}>{getRsvpBadge(guest.rsvpStatus)}</span>
+                  </div>
+                  <div className={styles.cardRow}>
+                    <span className={styles.cardLabel}>COMPANIONS</span>
+                    <span className={styles.cardValue}>{guest.companions > 0 ? `+${guest.companions}` : '—'}</span>
+                  </div>
+                  <div className={styles.cardRow}>
+                    <span className={styles.cardLabel}>DIETARY</span>
+                    <span className={styles.cardValue}>{guest.dietaryRestrictions || '—'}</span>
+                  </div>
+                  <div className={styles.cardRow}>
+                    <span className={styles.cardLabel}>APPROVAL</span>
+                    <span className={styles.cardValue}>{getApprovalBadge(guest.approvalStatus)}</span>
+                  </div>
+                  <div className={styles.cardRow}>
+                    <span className={styles.cardLabel}>REGISTERED</span>
+                    <span className={styles.cardValue}>
+                      {new Date(guest.submittedAt).toLocaleString(undefined, {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </span>
+                  </div>
+                  <div className={styles.cardActions}>
+                    {guest.approvalStatus === 'Pending' && (
+                      <button onClick={() => handleApprove(guest.id)} className={styles.approveBtn}>Approve</button>
+                    )}
+                    <button onClick={() => startEdit(guest)} className={styles.editBtn}>Edit</button>
+                    <button onClick={() => handleDelete(guest.id, guest.name)} className={styles.deleteBtn}>Delete</button>
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
         </div>
       )}
     </div>
   );
+}
+
+function getRsvpBadge(status: string) {
+  const colors: Record<string, string> = {
+    Attending: styles.badgeGreen,
+    'Not Attending': styles.badgeRed,
+    Undecided: styles.badgeYellow,
+  };
+  return <span className={`${styles.badge} ${colors[status] || ''}`}>{status}</span>;
+}
+
+function getApprovalBadge(status: string) {
+  const colors: Record<string, string> = {
+    Approved: styles.badgeGreen,
+    Pending: styles.badgeOrange,
+  };
+  return <span className={`${styles.badge} ${colors[status] || ''}`}>{status}</span>;
 }
 
 export default Admin;
