@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { login, fetchAdminGuests, updateGuest, deleteGuest, approveGuest, Guest } from '../api';
 import styles from './Admin.module.css';
 
@@ -17,7 +18,7 @@ function Admin() {
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
-  const [editEmail, setEditEmail] = useState('');
+  const [editContact, setEditContact] = useState('');
   const [editRsvp, setEditRsvp] = useState('');
 
   const loadGuests = useCallback(async () => {
@@ -67,13 +68,13 @@ function Admin() {
   function startEdit(guest: Guest) {
     setEditingId(guest.id);
     setEditName(guest.name);
-    setEditEmail(guest.email);
+    setEditContact(guest.contactNumber || '');
     setEditRsvp(guest.rsvpStatus);
   }
 
   async function saveEdit(id: string) {
     try {
-      await updateGuest(token, id, { name: editName, email: editEmail, rsvpStatus: editRsvp });
+      await updateGuest(token, id, { name: editName, rsvpStatus: editRsvp, contactNumber: editContact });
       setEditingId(null);
       loadGuests();
     } catch (err) {
@@ -129,7 +130,10 @@ function Admin() {
     <div className={styles.container}>
       <div className={styles.header}>
         <h1 className={styles.title}>Admin Panel</h1>
-        <button onClick={handleLogout} className={styles.logoutBtn}>Logout</button>
+        <div className={styles.headerActions}>
+          <Link to="/" className={styles.homeBtn}>🏠 Homepage</Link>
+          <button onClick={handleLogout} className={styles.logoutBtn}>Logout</button>
+        </div>
       </div>
 
       <div className={styles.summary}>
@@ -162,7 +166,7 @@ function Admin() {
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by name or email..."
+          placeholder="Search by name..."
           className={styles.searchInput}
         />
       </div>
@@ -184,7 +188,7 @@ function Admin() {
             <thead>
               <tr>
                 <th>Name</th>
-                <th>Email</th>
+                <th>Contact</th>
                 <th>RSVP</th>
                 <th>+</th>
                 <th>Dietary</th>
@@ -202,7 +206,7 @@ function Admin() {
                         <input value={editName} onChange={(e) => setEditName(e.target.value)} className={styles.editInput} />
                       </td>
                       <td>
-                        <input value={editEmail} onChange={(e) => setEditEmail(e.target.value)} className={styles.editInput} />
+                        <input value={editContact} onChange={(e) => setEditContact(e.target.value)} className={styles.editInput} />
                       </td>
                       <td>
                         <select value={editRsvp} onChange={(e) => setEditRsvp(e.target.value)} className={styles.editSelect}>
@@ -223,7 +227,7 @@ function Admin() {
                   ) : (
                     <>
                       <td>{guest.name}</td>
-                      <td className={styles.emailCell}>{guest.email}</td>
+                      <td className={styles.contactCell}>{guest.contactNumber || '—'}</td>
                       <td><span className={styles.badge}>{guest.rsvpStatus}</span></td>
                       <td>{guest.companions > 0 ? `+${guest.companions}` : '—'}</td>
                       <td className={styles.dietaryCell}>{guest.dietaryRestrictions || '—'}</td>

@@ -1,8 +1,8 @@
 export interface GuestInput {
   name: string;
-  email: string;
   rsvpStatus: string;
   companions?: number;
+  contactNumber?: string;
   dietaryRestrictions?: string;
 }
 
@@ -21,16 +21,6 @@ export function validateGuestInput(data: Partial<GuestInput>): ValidationError[]
     errors.push({ field: 'name', message: 'Name must be 100 characters or less' });
   }
 
-  // Email validation
-  if (!data.email || data.email.trim().length === 0) {
-    errors.push({ field: 'email', message: 'Email is required' });
-  } else {
-    const email = data.email.trim().toLowerCase();
-    if (!isValidEmail(email)) {
-      errors.push({ field: 'email', message: 'Please enter a valid email address' });
-    }
-  }
-
   // RSVP Status validation
   const validStatuses = ['Attending', 'Not Attending', 'Undecided'];
   if (!data.rsvpStatus || !validStatuses.includes(data.rsvpStatus)) {
@@ -45,30 +35,15 @@ export function validateGuestInput(data: Partial<GuestInput>): ValidationError[]
     }
   }
 
+  // Contact number validation (optional, max 20 chars)
+  if (data.contactNumber && data.contactNumber.length > 20) {
+    errors.push({ field: 'contactNumber', message: 'Contact number must be 20 characters or less' });
+  }
+
   // Dietary restrictions validation
   if (data.dietaryRestrictions && data.dietaryRestrictions.length > 200) {
     errors.push({ field: 'dietaryRestrictions', message: 'Dietary restrictions must be 200 characters or less' });
   }
 
   return errors;
-}
-
-function isValidEmail(email: string): boolean {
-  // Check for single @
-  const parts = email.split('@');
-  if (parts.length !== 2) return false;
-
-  const [local, domain] = parts;
-
-  // Local part checks
-  if (local.length === 0) return false;
-
-  // Domain checks
-  if (domain.length === 0) return false;
-  if (domain.startsWith('.') || domain.endsWith('.')) return false;
-  if (!domain.includes('.')) return false;
-
-  // Basic format check
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
 }

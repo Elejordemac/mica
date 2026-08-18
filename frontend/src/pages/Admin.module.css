@@ -80,12 +80,37 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .title {
   font-family: var(--font-display);
   font-size: 1.8rem;
   color: var(--text-primary);
+}
+
+.headerActions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.homeBtn {
+  padding: 0.5rem 1rem;
+  background: rgba(79, 195, 247, 0.1);
+  border: 1px solid var(--border);
+  color: var(--accent-primary);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.homeBtn:hover {
+  background: rgba(79, 195, 247, 0.2);
+  border-color: var(--accent-primary);
+  text-decoration: none;
 }
 
 .logoutBtn {
@@ -219,9 +244,9 @@
   color: var(--text-primary);
 }
 
-.emailCell {
+.contactCell {
   color: var(--text-muted);
-  max-width: 150px;
+  max-width: 120px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

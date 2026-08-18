@@ -13,7 +13,7 @@ interface FormErrors {
 
 function RSVPForm({ onBack }: RSVPFormProps) {
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [contactNumber, setContactNumber] = useState('');
   const [rsvpStatus, setRsvpStatus] = useState('Attending');
   const [companions, setCompanions] = useState(0);
   const [dietaryRestrictions, setDietaryRestrictions] = useState('');
@@ -32,14 +32,6 @@ function RSVPForm({ onBack }: RSVPFormProps) {
     if (!name.trim()) newErrors.name = 'Name is required';
     else if (name.trim().length > 100) newErrors.name = 'Name must be 100 characters or less';
 
-    if (!email.trim()) newErrors.email = 'Email is required';
-    else {
-      const parts = email.trim().split('@');
-      if (parts.length !== 2 || !parts[1].includes('.') || parts[1].startsWith('.') || parts[1].endsWith('.')) {
-        newErrors.email = 'Please enter a valid email address';
-      }
-    }
-
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -49,9 +41,9 @@ function RSVPForm({ onBack }: RSVPFormProps) {
     try {
       await registerGuest({
         name: name.trim(),
-        email: email.trim(),
         rsvpStatus,
         companions,
+        contactNumber: contactNumber.trim(),
         dietaryRestrictions: dietaryRestrictions.trim(),
       });
       setSuccess(true);
@@ -130,16 +122,17 @@ function RSVPForm({ onBack }: RSVPFormProps) {
         </div>
 
         <div className={styles.field}>
-          <label htmlFor="email" className={styles.label}>Email *</label>
+          <label htmlFor="contactNumber" className={styles.label}>Contact Number (optional)</label>
           <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className={`${styles.input} ${errors.email ? styles.inputError : ''}`}
-            placeholder="your@email.com"
+            id="contactNumber"
+            type="tel"
+            value={contactNumber}
+            onChange={(e) => setContactNumber(e.target.value)}
+            className={`${styles.input} ${errors.contactNumber ? styles.inputError : ''}`}
+            placeholder="e.g. 0412 345 678"
+            maxLength={20}
           />
-          {errors.email && <span className={styles.error}>{errors.email}</span>}
+          {errors.contactNumber && <span className={styles.error}>{errors.contactNumber}</span>}
         </div>
 
         <div className={styles.field}>

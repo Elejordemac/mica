@@ -8,7 +8,7 @@ const router = Router();
 router.get('/', async (_req: Request, res: Response) => {
   try {
     const result = await query(`
-      SELECT id, name, email, rsvp_status, approval_status, companions, submitted_at
+      SELECT id, name, contact_number, rsvp_status, approval_status, companions, submitted_at
       FROM guests
       ORDER BY submitted_at DESC
     `);
@@ -16,7 +16,7 @@ router.get('/', async (_req: Request, res: Response) => {
     const guests = result.rows.map(row => ({
       id: row.id,
       name: row.name,
-      email: row.email,
+      contactNumber: row.contact_number,
       rsvpStatus: row.rsvp_status,
       approvalStatus: row.approval_status,
       companions: row.companions,
@@ -47,34 +47,34 @@ router.get('/', async (_req: Request, res: Response) => {
   }
 });
 
-// POST /api/guests - Register/upsert guest
+// POST /api/guests - Register guest
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const { name, email, rsvpStatus, companions, dietaryRestrictions } = req.body;
+    const { name, rsvpStatus, companions, contactNumber, dietaryRestrictions } = req.body;
 
     // Validate input
-    const errors = validateGuestInput({ name, email, rsvpStatus, companions, dietaryRestrictions });
+    const errors = validateGuestInput({ name, rsvpStatus, companions, contactNumber, dietaryRestrictions });
     if (errors.length > 0) {
       res.status(400).json({ errors });
       return;
     }
 
-    const normalizedEmail = email.trim().toLowerCase();
     const normalizedName = name.trim();
     const comp = companions ? Number(companions) : 0;
+    const contact = contactNumber?.trim() || '';
     const dietary = dietaryRestrictions?.trim() || '';
 
-    // Check if email already exists (upsert)
-    const existing = await query('SELECT id FROM guests WHERE email = $1', [normalizedEmail]);
+    // Check if same name already exists (upsert by name)
+    const existing = await query('SELECT id FROM guests WHERE LOWER(name) = LOWER($1)', [normalizedName]);
 
     if (existing.rows.length > 0) {
       // Update existing record
       const updateResult = await query(
         `UPDATE guests 
-         SET name = $1, rsvp_status = $2, companions = $3, dietary_restrictions = $4, updated_at = NOW()
-         WHERE email = $5
-         RETURNING id, name, email, rsvp_status, approval_status, companions, dietary_restrictions, submitted_at`,
-        [normalizedName, rsvpStatus, comp, dietary, normalizedEmail]
+         SET rsvp_status = $1, companions = $2, contact_number = $3, dietary_restrictions = $4, updated_at = NOW()
+         WHERE LOWER(name) = LOWER($5)
+         RETURNING id, name, contact_number, rsvp_status, approval_status, companions, dietary_restrictions, submitted_at`,
+        [rsvpStatus, comp, contact, dietary, normalizedName]
       );
 
       const guest = updateResult.rows[0];
@@ -83,7 +83,7 @@ router.post('/', async (req: Request, res: Response) => {
         guest: {
           id: guest.id,
           name: guest.name,
-          email: guest.email,
+          contactNumber: guest.contact_number,
           rsvpStatus: guest.rsvp_status,
           approvalStatus: guest.approval_status,
           companions: guest.companions,
@@ -94,10 +94,10 @@ router.post('/', async (req: Request, res: Response) => {
     } else {
       // Insert new record
       const insertResult = await query(
-        `INSERT INTO guests (name, email, rsvp_status, companions, dietary_restrictions)
-         VALUES ($1, $2, $3, $4, $5)
-         RETURNING id, name, email, rsvp_status, approval_status, companions, dietary_restrictions, submitted_at`,
-        [normalizedName, normalizedEmail, rsvpStatus, comp, dietary]
+        `INSERT INTO guests (name, email, rsvp_status, companions, contact_number, dietary_restrictions)
+         VALUES ($1, '', $2, $3, $4, $5)
+         RETURNING id, name, contact_number, rsvp_status, approval_status, companions, dietary_restrictions, submitted_at`,
+        [normalizedName, rsvpStatus, comp, contact, dietary]
       );
 
       const guest = insertResult.rows[0];
@@ -106,7 +106,7 @@ router.post('/', async (req: Request, res: Response) => {
         guest: {
           id: guest.id,
           name: guest.name,
-          email: guest.email,
+          contactNumber: guest.contact_number,
           rsvpStatus: guest.rsvp_status,
           approvalStatus: guest.approval_status,
           companions: guest.companions,

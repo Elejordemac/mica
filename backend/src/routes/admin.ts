@@ -14,7 +14,7 @@ router.get('/guests', async (req: AuthRequest, res: Response) => {
     const { status, search } = req.query;
 
     let sql = `
-      SELECT id, name, email, rsvp_status, approval_status, companions, 
+      SELECT id, name, contact_number, rsvp_status, approval_status, companions, 
              dietary_restrictions, submitted_at, updated_at
       FROM guests
       WHERE 1=1
@@ -29,7 +29,7 @@ router.get('/guests', async (req: AuthRequest, res: Response) => {
     }
 
     if (search && typeof search === 'string' && search.trim().length > 0) {
-      sql += ` AND (LOWER(name) LIKE $${paramIndex} OR LOWER(email) LIKE $${paramIndex})`;
+      sql += ` AND (LOWER(name) LIKE $${paramIndex} OR LOWER(contact_number) LIKE $${paramIndex})`;
       params.push(`%${search.trim().toLowerCase()}%`);
       paramIndex++;
     }
@@ -41,7 +41,7 @@ router.get('/guests', async (req: AuthRequest, res: Response) => {
     const guests = result.rows.map(row => ({
       id: row.id,
       name: row.name,
-      email: row.email,
+      contactNumber: row.contact_number,
       rsvpStatus: row.rsvp_status,
       approvalStatus: row.approval_status,
       companions: row.companions,
@@ -76,7 +76,7 @@ router.get('/guests', async (req: AuthRequest, res: Response) => {
 router.put('/guests/:id', async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, email, rsvpStatus } = req.body;
+    const { name, rsvpStatus, contactNumber } = req.body;
 
     // Check if guest exists
     const existing = await query('SELECT id FROM guests WHERE id = $1', [id]);
@@ -86,26 +86,19 @@ router.put('/guests/:id', async (req: AuthRequest, res: Response) => {
     }
 
     // Validate input
-    const errors = validateGuestInput({ name, email, rsvpStatus });
+    const errors = validateGuestInput({ name, rsvpStatus, contactNumber });
     if (errors.length > 0) {
       res.status(400).json({ errors });
       return;
     }
 
-    const normalizedEmail = email.trim().toLowerCase();
-
-    // Check email uniqueness (exclude current guest)
-    const emailCheck = await query('SELECT id FROM guests WHERE email = $1 AND id != $2', [normalizedEmail, id]);
-    if (emailCheck.rows.length > 0) {
-      res.status(409).json({ error: 'Email already in use by another guest' });
-      return;
-    }
+    const contact = contactNumber?.trim() || '';
 
     const result = await query(
-      `UPDATE guests SET name = $1, email = $2, rsvp_status = $3, updated_at = NOW()
+      `UPDATE guests SET name = $1, rsvp_status = $2, contact_number = $3, updated_at = NOW()
        WHERE id = $4
-       RETURNING id, name, email, rsvp_status, approval_status, companions, dietary_restrictions, submitted_at`,
-      [name.trim(), normalizedEmail, rsvpStatus, id]
+       RETURNING id, name, contact_number, rsvp_status, approval_status, companions, dietary_restrictions, submitted_at`,
+      [name.trim(), rsvpStatus, contact, id]
     );
 
     const guest = result.rows[0];
@@ -114,7 +107,7 @@ router.put('/guests/:id', async (req: AuthRequest, res: Response) => {
       guest: {
         id: guest.id,
         name: guest.name,
-        email: guest.email,
+        contactNumber: guest.contact_number,
         rsvpStatus: guest.rsvp_status,
         approvalStatus: guest.approval_status,
         companions: guest.companions,

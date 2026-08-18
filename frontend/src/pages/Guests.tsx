@@ -18,7 +18,6 @@ function Guests() {
       setCounts(data.counts);
       setError('');
     } catch (err) {
-      // Only show error on initial load, not background polls
       if (loading) {
         setError((err as Error).message);
       }
@@ -35,7 +34,7 @@ function Guests() {
     };
   }, []);
 
-  function getStatusBadge(status: string, _type: 'rsvp' | 'approval') {
+  function getStatusBadge(status: string) {
     const classes: Record<string, string> = {
       Attending: styles.badgeGreen,
       'Not Attending': styles.badgeRed,
@@ -90,33 +89,39 @@ function Guests() {
             <p>Be the first to RSVP!</p>
           </div>
         ) : (
-          <div className={styles.tableWrapper}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>RSVP</th>
-                  <th>+</th>
-                  <th>Status</th>
-                  <th>Registered</th>
-                </tr>
-              </thead>
-              <tbody>
-                {guests.map((guest) => (
-                  <tr key={guest.id}>
-                    <td>{guest.name}</td>
-                    <td className={styles.emailCell}>{guest.email}</td>
-                    <td>{getStatusBadge(guest.rsvpStatus, 'rsvp')}</td>
-                    <td>{guest.companions > 0 ? `+${guest.companions}` : '—'}</td>
-                    <td>{getStatusBadge(guest.approvalStatus, 'approval')}</td>
-                    <td className={styles.dateCell}>
-                      {new Date(guest.submittedAt).toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className={styles.cardList}>
+            {guests.map((guest) => (
+              <div key={guest.id} className={styles.card}>
+                <div className={styles.cardRow}>
+                  <span className={styles.cardLabel}>NAME</span>
+                  <span className={styles.cardValue}>{guest.name}</span>
+                </div>
+                <div className={styles.cardRow}>
+                  <span className={styles.cardLabel}>RSVP</span>
+                  <span className={styles.cardValue}>{getStatusBadge(guest.rsvpStatus)}</span>
+                </div>
+                <div className={styles.cardRow}>
+                  <span className={styles.cardLabel}>COMPANIONS</span>
+                  <span className={styles.cardValue}>{guest.companions > 0 ? `+${guest.companions}` : '—'}</span>
+                </div>
+                <div className={styles.cardRow}>
+                  <span className={styles.cardLabel}>APPROVAL</span>
+                  <span className={styles.cardValue}>{getStatusBadge(guest.approvalStatus)}</span>
+                </div>
+                <div className={styles.cardRow}>
+                  <span className={styles.cardLabel}>REGISTERED</span>
+                  <span className={styles.cardValue}>
+                    {new Date(guest.submittedAt).toLocaleString(undefined, {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>

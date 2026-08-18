@@ -3,7 +3,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 export interface Guest {
   id: string;
   name: string;
-  email: string;
+  contactNumber?: string;
   rsvpStatus: string;
   approvalStatus: string;
   companions: number;
@@ -23,9 +23,9 @@ export interface GuestListResponse {
 
 export interface RegisterData {
   name: string;
-  email: string;
   rsvpStatus: string;
   companions: number;
+  contactNumber: string;
   dietaryRestrictions: string;
 }
 
@@ -114,7 +114,7 @@ export async function fetchAdminGuests(
 export async function updateGuest(
   token: string,
   id: string,
-  data: { name: string; email: string; rsvpStatus: string }
+  data: { name: string; rsvpStatus: string; contactNumber: string }
 ): Promise<void> {
   const res = await fetch(`${API_URL}/api/admin/guests/${id}`, {
     method: 'PUT',
