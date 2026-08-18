@@ -1,0 +1,60 @@
+.heroWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  animation: heroReveal 1.5s ease-out forwards;
+}
+
+.glowRing {
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+  animation: pulse 3s ease-in-out infinite;
+}
+
+.heroSvg {
+  width: 150px;
+  height: 150px;
+  animation: bobbing 4s ease-in-out infinite;
+  filter: drop-shadow(0 0 20px var(--accent-glow));
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes heroReveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  60% {
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bobbing {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+}
