@@ -51,6 +51,7 @@ function Invitation({ onRSVP }: InvitationProps) {
           <button className={styles.primaryBtn} onClick={onRSVP}>
             RSVP NOW
           </button>
+          <p className={styles.deadline}>⏰ RSVP by August 31, 2026 — 1:00 PM</p>
           <Link to="/guests" className={styles.secondaryBtn}>
             VIEW GUEST LIST
           </Link>

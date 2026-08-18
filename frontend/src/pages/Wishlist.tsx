@@ -39,6 +39,9 @@ function Wishlist() {
           <p className={styles.registryNote}>
             You can browse, choose, and purchase items directly from the registry.
           </p>
+          <p className={styles.registryPassword}>
+            🔑 Registry Password: <strong>Krissy</strong>
+          </p>
         </div>
 
         <div className={styles.footer}>
